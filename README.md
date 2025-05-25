@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SolarRank Frontend
 
 A modern Next.js application built with TypeScript and Tailwind CSS.
@@ -79,3 +80,6 @@ yarn build
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+=======
+# solarrank-front
+>>>>>>> cc8a8e596c4832916d583ab76d69ecd8d3c4db80
