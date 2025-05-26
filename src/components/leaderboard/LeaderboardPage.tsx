@@ -15,6 +15,7 @@ import { Trophy, Medal, Users, ArrowUp, ArrowDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Header } from "../ui/header";
 
 interface LeaderboardUser {
   id: number;
@@ -57,24 +58,24 @@ const leaderboardTabs: LeaderboardTabProps[] = [
   },
 ];
 
-const LeaderboardHeader = () => {
-  return (
-    <div className="flex flex-col items-center justify-center mb-8 text-center">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">Leaderboard</h1>
-      <p className="text-muted-foreground max-w-md">
-        Track your progress and see how you rank against other users in the
-        community.
-      </p>
-    </div>
-  );
-};
+// function LeaderboardHeader() {
+//   return (
+//     <div className="flex flex-col items-center justify-center mb-8 text-center">
+//       <h1 className="text-3xl font-bold tracking-tight mb-2">Leaderboard</h1>
+//       <p className="text-muted-foreground max-w-md">
+//         Track your progress and see how you rank against other users in the
+//         community.
+//       </p>
+//     </div>
+//   );
+// }
 
-const LeaderboardTable: React.FC<LeaderboardProps> = ({
+function LeaderboardTable({
   users,
   currentPage,
   totalPages,
   onPageChange,
-}) => {
+}: LeaderboardProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-12 py-3 px-4 text-sm font-medium text-muted-foreground border-b">
@@ -222,11 +223,11 @@ const LeaderboardTable: React.FC<LeaderboardProps> = ({
       </Pagination>
     </div>
   );
-};
+}
 
-const YourStats = () => {
+function YourStats() {
   return (
-    <Card className="p-6 mb-8">
+    <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Your Stats</h2>
         <Badge variant="outline">Rank #42</Badge>
@@ -258,9 +259,9 @@ const YourStats = () => {
       </div>
     </Card>
   );
-};
+}
 
-const Tabs = ({
+function Tabs({
   selected,
   setSelected,
   tabs,
@@ -268,7 +269,7 @@ const Tabs = ({
   selected: string;
   setSelected: (value: string) => void;
   tabs: LeaderboardTabProps[];
-}) => {
+}) {
   return (
     <div className="flex space-x-1 border-b">
       {tabs.map((tab) => (
@@ -289,9 +290,9 @@ const Tabs = ({
       ))}
     </div>
   );
-};
+}
 
-const LeaderboardPage = () => {
+function LeaderboardPage() {
   const [selectedTab, setSelectedTab] = React.useState<string>("weekly");
   const [currentPage, setCurrentPage] = React.useState<number>(1);
 
@@ -372,10 +373,15 @@ const LeaderboardPage = () => {
   ];
 
   return (
-    <div className="container py-10">
-      <LeaderboardHeader />
-
+    <div className="container">
+      <Header
+        title="Leaderboard"
+        description="Track your progress and see how you rank against other users in the community."
+      />
       <div className="flex flex-col md:flex-row gap-8">
+        <div className="md:hidden block">
+          <YourStats />
+        </div>
         <div className="md:w-3/4">
           <div className="mb-6">
             <Tabs
@@ -384,20 +390,17 @@ const LeaderboardPage = () => {
               tabs={leaderboardTabs}
             />
           </div>
-
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">{mockUsers.length} Users</span>
             </div>
-
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
                 Last updated: 2 hours ago
               </span>
             </div>
           </div>
-
           <LeaderboardTable
             users={mockUsers}
             currentPage={currentPage}
@@ -405,10 +408,10 @@ const LeaderboardPage = () => {
             onPageChange={setCurrentPage}
           />
         </div>
-
-        <div className="md:w-1/4">
-          <YourStats />
-
+        <div className="md:w-1/4 space-y-8">
+          <div className="hidden md:block">
+            <YourStats />
+          </div>
           <Card className="p-6">
             <h3 className="text-lg font-bold mb-4">Leaderboard Rules</h3>
             <ul className="space-y-2 text-sm">
@@ -444,6 +447,6 @@ const LeaderboardPage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default LeaderboardPage;

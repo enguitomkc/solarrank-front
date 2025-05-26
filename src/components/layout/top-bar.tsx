@@ -49,15 +49,6 @@ export function TopBar({ className }: TopBarProps) {
 
         {/* Right: Nav links, notifications, profile */}
         <div className="flex items-center space-x-4">
-          <div className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" asChild>
-              <Link href="/feed">Feed</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/leaderboard">Leaderboard</Link>
-            </Button>
-          </div>
-
           <Button variant="ghost" size="icon" className="relative">
             <BellIcon className="h-5 w-5" />
             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-2 ring-black"></span>

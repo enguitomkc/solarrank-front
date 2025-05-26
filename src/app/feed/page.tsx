@@ -2,17 +2,19 @@ import { Suspense } from "react";
 import { PostFeed } from "@/components/feed/post-feed";
 import { PostSorter } from "@/components/feed/post-sorter";
 import { CreatePostButton } from "@/components/feed/create-post-button";
+import { Header } from "@/components/ui/header";
 
 export default function FeedPage() {
   return (
-    <div className="container max-w-5xl py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Community Feed</h1>
-        <CreatePostButton />
-      </div>
+    <div className="container max-w-5xl space-y-6">
+      <Header
+        title="Community Feed"
+        description="Share your thoughts and ideas with the community."
+      />
 
       <div className="flex items-center justify-between">
         <PostSorter />
+        <CreatePostButton />
       </div>
 
       <Suspense fallback={<PostFeedSkeleton />}>
