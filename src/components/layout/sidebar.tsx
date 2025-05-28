@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 interface AnimatedMenuToggleProps {
   toggle: () => void;
@@ -82,6 +84,8 @@ interface SidebarProps {
 export function Sidebar({ className, children }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const mobileSidebarVariants = {
     hidden: { x: "-100%" },
@@ -120,6 +124,11 @@ export function Sidebar({ className, children }: SidebarProps) {
   };
 
   const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   useEffect(() => {
     // Ensure router is only used on the client side
@@ -207,7 +216,10 @@ export function Sidebar({ className, children }: SidebarProps) {
               </ScrollArea>
               {/* Footer / Action Button */}
               <div className="p-4 border-t border-border">
-                <button className="w-full flex items-center justify-center gap-2 font-medium text-sm p-2 text-center bg-primary/10 text-primary rounded-md hover:bg-primary/20">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 font-medium text-sm p-2 text-center bg-primary/10 text-primary rounded-md hover:bg-primary/20"
+                >
                   <LogOut className="h-4 w-4" />
                   Sign out
                 </button>
@@ -314,7 +326,10 @@ export function Sidebar({ className, children }: SidebarProps) {
           </ScrollArea>
           {/* Footer / Action Button */}
           <div className="p-4 border-t border-border">
-            <button className="w-full flex items-center justify-center gap-2 font-medium text-sm p-2 text-center bg-primary/10 text-primary rounded-md hover:bg-primary/20">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 font-medium text-sm p-2 text-center bg-primary/10 text-primary rounded-md hover:bg-primary/20"
+            >
               <LogOut className="h-4 w-4" />
               <motion.span variants={variants}>
                 {!isCollapsed && "Sign out"}

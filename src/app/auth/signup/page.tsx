@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,52 +13,86 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ErrorModal } from "@/components/ui/error-modal";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SignupPage() {
+  const { signup, isLoading, error, clearError } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  // Show error modal when there's an API error
+  useEffect(() => {
+    if (error) {
+      setShowErrorModal(true);
+    }
+  }, [error]);
+
+  // Clear auth error when component mounts
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Clear validation errors when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    } else if (formData.name.trim().length > 50) {
+      newErrors.name = "Name must be less than 50 characters";
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.name.trim())) {
+      newErrors.name = "Name can only contain letters and spaces";
     }
 
+    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
 
+    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one lowercase letter, one uppercase letter, and one number";
     }
 
+    // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors);
+    setValidationErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -69,22 +103,33 @@ export default function SignupPage() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // TODO: Implement actual signup API call
-      console.log("Signup data:", formData);
+      await signup({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Redirect to login or dashboard after successful signup
-      // router.push('/auth/login')
+      // If signup is successful, the store will update isAuthenticated
+      // and the useEffect will redirect to home page
     } catch (error) {
+      // Error is handled by the store and will show in modal
       console.error("Signup error:", error);
-      setErrors({ general: "Something went wrong. Please try again." });
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const handleErrorModalClose = () => {
+    setShowErrorModal(false);
+    clearError();
+  };
+
+  const handleRetry = () => {
+    setShowErrorModal(false);
+    clearError();
+    // Focus on the first input to encourage user to try again
+    const firstInput = document.getElementById("name");
+    if (firstInput) {
+      firstInput.focus();
     }
   };
 
@@ -173,12 +218,6 @@ export default function SignupPage() {
 
             {/* Signup Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {errors.general && (
-                <div className="text-sm text-red-600 dark:text-red-400 text-center">
-                  {errors.general}
-                </div>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -188,12 +227,12 @@ export default function SignupPage() {
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className={errors.name ? "border-red-500" : ""}
+                  className={validationErrors.name ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
-                {errors.name && (
+                {validationErrors.name && (
                   <p className="text-sm text-red-600 dark:text-red-400">
-                    {errors.name}
+                    {validationErrors.name}
                   </p>
                 )}
               </div>
@@ -207,12 +246,12 @@ export default function SignupPage() {
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={errors.email ? "border-red-500" : ""}
+                  className={validationErrors.email ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
-                {errors.email && (
+                {validationErrors.email && (
                   <p className="text-sm text-red-600 dark:text-red-400">
-                    {errors.email}
+                    {validationErrors.email}
                   </p>
                 )}
               </div>
@@ -226,12 +265,12 @@ export default function SignupPage() {
                   placeholder="Create a password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={errors.password ? "border-red-500" : ""}
+                  className={validationErrors.password ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
-                {errors.password && (
+                {validationErrors.password && (
                   <p className="text-sm text-red-600 dark:text-red-400">
-                    {errors.password}
+                    {validationErrors.password}
                   </p>
                 )}
               </div>
@@ -245,12 +284,14 @@ export default function SignupPage() {
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={errors.confirmPassword ? "border-red-500" : ""}
+                  className={
+                    validationErrors.confirmPassword ? "border-red-500" : ""
+                  }
                   disabled={isLoading}
                 />
-                {errors.confirmPassword && (
+                {validationErrors.confirmPassword && (
                   <p className="text-sm text-red-600 dark:text-red-400">
-                    {errors.confirmPassword}
+                    {validationErrors.confirmPassword}
                   </p>
                 )}
               </div>
@@ -294,6 +335,15 @@ export default function SignupPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Error Modal */}
+        <ErrorModal
+          isOpen={showErrorModal}
+          onClose={handleErrorModalClose}
+          title="Signup Failed"
+          message={error || "An unexpected error occurred. Please try again."}
+          onRetry={handleRetry}
+        />
       </div>
     </div>
   );

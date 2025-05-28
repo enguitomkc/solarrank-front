@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ErrorModal } from "@/components/ui/error-modal";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -20,7 +22,16 @@ export default function LoginPage() {
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  const { login, isLoading, error, clearError } = useAuth();
+
+  // Show error modal when there's an API error
+  useEffect(() => {
+    if (error) {
+      setShowErrorModal(true);
+    }
+  }, [error]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,22 +66,27 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // TODO: Implement actual login API call
-      console.log("Login data:", formData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Redirect to dashboard after successful login
-      // router.push('/dashboard')
+      await login(formData);
+      // Login successful - the auth store will handle navigation
     } catch (error) {
+      // Error is handled by the store and will show in modal
       console.error("Login error:", error);
-      setErrors({ general: "Invalid email or password. Please try again." });
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const handleErrorModalClose = () => {
+    setShowErrorModal(false);
+    clearError();
+  };
+
+  const handleRetry = () => {
+    setShowErrorModal(false);
+    clearError();
+    // Focus on the email input to encourage user to try again
+    const emailInput = document.getElementById("email");
+    if (emailInput) {
+      emailInput.focus();
     }
   };
 
@@ -157,12 +173,6 @@ export default function LoginPage() {
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {errors.general && (
-                <div className="text-sm text-red-600 dark:text-red-400 text-center">
-                  {errors.general}
-                </div>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <Input
@@ -231,6 +241,15 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Error Modal */}
+        <ErrorModal
+          isOpen={showErrorModal}
+          onClose={handleErrorModalClose}
+          title="Login Failed"
+          message={error || "An unexpected error occurred. Please try again."}
+          onRetry={handleRetry}
+        />
       </div>
     </div>
   );
