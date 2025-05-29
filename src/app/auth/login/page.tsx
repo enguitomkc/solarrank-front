@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,8 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-  const { login, isLoading, error, clearError } = useAuth();
+  const router = useRouter();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
 
   // Show error modal when there's an API error
   useEffect(() => {
@@ -32,6 +34,13 @@ export default function LoginPage() {
       setShowErrorModal(true);
     }
   }, [error]);
+
+  // Redirect to leaderboard if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/leaderboard");
+    }
+  }, [isAuthenticated, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,7 +77,8 @@ export default function LoginPage() {
 
     try {
       await login(formData);
-      // Login successful - the auth store will handle navigation
+      // Successful login will trigger isAuthenticated state change,
+      // and the useEffect above will handle redirection.
     } catch (error) {
       // Error is handled by the store and will show in modal
       console.error("Login error:", error);

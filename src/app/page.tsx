@@ -97,7 +97,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="mb-4 bg-[#38b6ff]/10 text-[#38b6ff] hover:bg-[#38b6ff]/10 border-[#38b6ff]/20">
+              <Badge className="mb-4 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200">
                 #1 Solar Installer Community
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
@@ -129,17 +129,19 @@ export default function Home() {
               {/* Stats */}
               <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-gray-200">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">50K+</div>
+                  <div className="text-2xl font-bold text-[#38b6ff]">50K+</div>
                   <div className="text-sm text-gray-600">Active Installers</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">8.4GW</div>
+                  <div className="text-2xl font-bold text-emerald-600">
+                    8.4GW
+                  </div>
                   <div className="text-sm text-gray-600">
                     Community Solar Installed
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">242K</div>
+                  <div className="text-2xl font-bold text-purple-600">242K</div>
                   <div className="text-sm text-gray-600">
                     Solar Jobs Created
                   </div>
@@ -247,8 +249,8 @@ export default function Home() {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <CheckCircle className="h-6 w-6 text-emerald-600" />
                 </div>
                 <CardTitle>Expert Answers</CardTitle>
                 <CardDescription>
@@ -273,8 +275,8 @@ export default function Home() {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-yellow-600" />
+                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-amber-600" />
                 </div>
                 <CardTitle>Skill Challenges</CardTitle>
                 <CardDescription>
@@ -286,8 +288,8 @@ export default function Home() {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                  <Star className="h-6 w-6 text-red-600" />
+                <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center mb-4">
+                  <Star className="h-6 w-6 text-rose-600" />
                 </div>
                 <CardTitle>Certification Tracking</CardTitle>
                 <CardDescription>
@@ -333,7 +335,9 @@ export default function Home() {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">70%</div>
+              <div className="text-4xl font-bold text-emerald-600 mb-2">
+                70%
+              </div>
               <div className="text-gray-600">
                 Cost reduction in solar panels since 2014
               </div>
@@ -347,7 +351,7 @@ export default function Home() {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-orange-600 mb-2">39%</div>
+              <div className="text-4xl font-bold text-amber-600 mb-2">39%</div>
               <div className="text-gray-600">
                 Of homeowners considering solar installation
               </div>
