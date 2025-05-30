@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AuthStore, RegisterRequest, LoginRequest } from '@/types/auth';
-import { authApi, ApiError } from '@/lib/api';
+import { ApiError } from '@/utils/apiRequest';
+import { authApi } from '@/api/auth';
 
 const useAuthStore = create<AuthStore>()(
   persist(

@@ -12,12 +12,12 @@ import {
   Grid,
   LogOut,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { redirect } from "next/navigation";
+import { cn } from "@/utils/cn";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface AnimatedMenuToggleProps {
   toggle: () => void;
@@ -84,7 +84,7 @@ interface SidebarProps {
 export function Sidebar({ className, children }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const router = useRouter();
 
   const mobileSidebarVariants = {
@@ -130,6 +130,11 @@ export function Sidebar({ className, children }: SidebarProps) {
     router.push("/");
   };
 
+  // Get user's profile link
+  const profileLink = user?.username
+    ? `/profile/${user.username}`
+    : "/profile/settings";
+
   useEffect(() => {
     // Ensure router is only used on the client side
     if (typeof window !== "undefined") {
@@ -153,33 +158,54 @@ export function Sidebar({ className, children }: SidebarProps) {
             <div className="flex flex-col h-full">
               {/* Profile Section */}
               <div className="p-4 border-b border-border">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-12 w-12 bg-muted">
-                    <AvatarFallback>SR</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">Solar Installer</p>
-                    <p className="text-sm text-muted-foreground">
-                      installer@example.com
-                    </p>
+                <Link href={profileLink} onClick={() => setIsOpen(false)}>
+                  <div className="flex items-center space-x-3 hover:bg-muted/50 rounded-lg p-2 transition-colors">
+                    <Avatar className="h-12 w-12 bg-muted">
+                      <AvatarImage
+                        src={user?.profile_image}
+                        alt={user?.name || "User"}
+                      />
+                      <AvatarFallback>
+                        {user?.name
+                          ? user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                          : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{user?.name || "User"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.email || "user@example.com"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </div>
               {/* Navigation Section */}
               <ScrollArea className="flex-1 p-4">
                 <nav>
                   <ul>
                     <li className="mb-2">
-                      <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                        <Home className="h-5 w-5" />
-                        Home
-                      </button>
+                      <Link href="/feed" onClick={() => setIsOpen(false)}>
+                        <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                          <Home className="h-5 w-5" />
+                          Home
+                        </div>
+                      </Link>
                     </li>
                     <li className="mb-2">
-                      <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                        <Award className="h-5 w-5" />
-                        Leaderboard
-                      </button>
+                      <Link
+                        href="/leaderboard"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                          <Award className="h-5 w-5" />
+                          Leaderboard
+                        </div>
+                      </Link>
                     </li>
                     <li className="mb-2">
                       <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
@@ -188,16 +214,20 @@ export function Sidebar({ className, children }: SidebarProps) {
                       </button>
                     </li>
                     <li className="mb-2">
-                      <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                        <MessageSquare className="h-5 w-5" />
-                        Community Feed
-                      </button>
+                      <Link href="/feed" onClick={() => setIsOpen(false)}>
+                        <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                          <MessageSquare className="h-5 w-5" />
+                          Community Feed
+                        </div>
+                      </Link>
                     </li>
                     <li className="mb-2">
-                      <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                        <User className="h-5 w-5" />
-                        Profile
-                      </button>
+                      <Link href={profileLink} onClick={() => setIsOpen(false)}>
+                        <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                          <User className="h-5 w-5" />
+                          Profile
+                        </div>
+                      </Link>
                     </li>
                     <li className="mb-2">
                       <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
@@ -206,10 +236,15 @@ export function Sidebar({ className, children }: SidebarProps) {
                       </button>
                     </li>
                     <li className="mb-2">
-                      <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                        <Settings className="h-5 w-5" />
-                        Settings
-                      </button>
+                      <Link
+                        href="/profile/settings"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                          <Settings className="h-5 w-5" />
+                          Settings
+                        </div>
+                      </Link>
                     </li>
                   </ul>
                 </nav>
@@ -245,47 +280,59 @@ export function Sidebar({ className, children }: SidebarProps) {
         >
           {/* Profile Section */}
           <div className="p-4 border-b border-border">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10 bg-muted">
-                <AvatarFallback>SR</AvatarFallback>
-              </Avatar>
-              <motion.div variants={variants} className="flex flex-col">
-                {!isCollapsed && (
-                  <>
-                    <p className="font-semibold">Solar Installer</p>
-                    <p className="text-xs text-muted-foreground">
-                      installer@example.com
-                    </p>
-                  </>
-                )}
-              </motion.div>
-            </div>
+            <Link href={profileLink}>
+              <div className="flex items-center space-x-3 hover:bg-muted/50 rounded-lg p-2 transition-colors">
+                <Avatar className="h-10 w-10 bg-muted">
+                  <AvatarImage
+                    src={user?.profile_image}
+                    alt={user?.name || "User"}
+                  />
+                  <AvatarFallback>
+                    {user?.name
+                      ? user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <motion.div variants={variants} className="flex flex-col">
+                  {!isCollapsed && (
+                    <>
+                      <p className="font-semibold">{user?.name || "User"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user?.email || "user@example.com"}
+                      </p>
+                    </>
+                  )}
+                </motion.div>
+              </div>
+            </Link>
           </div>
           {/* Navigation Section */}
           <ScrollArea className="flex-1 p-2">
             <nav>
               <ul>
                 <li className="mb-2">
-                  <button
-                    onClick={() => redirect("/leaderboard")}
-                    className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted"
-                  >
-                    <Award className="h-5 w-5" />
-                    <motion.span variants={variants}>
-                      {!isCollapsed && "Leaderboard"}
-                    </motion.span>
-                  </button>
+                  <Link href="/leaderboard">
+                    <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                      <Award className="h-5 w-5" />
+                      <motion.span variants={variants}>
+                        {!isCollapsed && "Leaderboard"}
+                      </motion.span>
+                    </div>
+                  </Link>
                 </li>
                 <li className="mb-2">
-                  <button
-                    onClick={() => redirect("/feed")}
-                    className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted"
-                  >
-                    <MessageSquare className="h-5 w-5" />
-                    <motion.span variants={variants}>
-                      {!isCollapsed && "Community Feed"}
-                    </motion.span>
-                  </button>
+                  <Link href="/feed">
+                    <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                      <MessageSquare className="h-5 w-5" />
+                      <motion.span variants={variants}>
+                        {!isCollapsed && "Community Feed"}
+                      </motion.span>
+                    </div>
+                  </Link>
                 </li>
                 <li className="mb-2">
                   <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
@@ -296,12 +343,14 @@ export function Sidebar({ className, children }: SidebarProps) {
                   </button>
                 </li>
                 <li className="mb-2">
-                  <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                    <User className="h-5 w-5" />
-                    <motion.span variants={variants}>
-                      {!isCollapsed && "Profile"}
-                    </motion.span>
-                  </button>
+                  <Link href={profileLink}>
+                    <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                      <User className="h-5 w-5" />
+                      <motion.span variants={variants}>
+                        {!isCollapsed && "Profile"}
+                      </motion.span>
+                    </div>
+                  </Link>
                 </li>
                 <li className="mb-2">
                   <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
@@ -312,12 +361,14 @@ export function Sidebar({ className, children }: SidebarProps) {
                   </button>
                 </li>
                 <li className="mb-2">
-                  <button className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
-                    <Settings className="h-5 w-5" />
-                    <motion.span variants={variants}>
-                      {!isCollapsed && "Settings"}
-                    </motion.span>
-                  </button>
+                  <Link href="/profile/settings">
+                    <div className="flex gap-2 font-medium text-sm items-center w-full py-2 px-4 rounded-md hover:bg-muted">
+                      <Settings className="h-5 w-5" />
+                      <motion.span variants={variants}>
+                        {!isCollapsed && "Settings"}
+                      </motion.span>
+                    </div>
+                  </Link>
                 </li>
               </ul>
               {/* Toggleable Sections */}

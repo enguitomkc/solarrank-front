@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BellIcon, SearchIcon, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 

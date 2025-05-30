@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import useAuthStore from '@/lib/stores/auth';
-import { authApi } from '@/lib/api';
+import useAuthStore from '@/stores/auth';
+import { authApi } from '@/api';
 
 export const useAuth = () => {
   const store = useAuthStore();
