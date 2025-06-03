@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ErrorModal } from "@/components/ui/error-modal";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthContext } from "@/contexts/Auth";
 
 export default function SignupPage() {
-  const { signup, isLoading, error, clearError } = useAuth();
+  const { signup, isLoading, error, clearError } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     name: "",

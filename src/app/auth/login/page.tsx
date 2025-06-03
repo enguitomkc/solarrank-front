@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ErrorModal } from "@/components/ui/error-modal";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthContext } from "@/contexts/Auth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -26,7 +26,8 @@ export default function LoginPage() {
   const [showErrorModal, setShowErrorModal] = useState(false);
 
   const router = useRouter();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
+  const { login, isLoading, error, clearError, isAuthenticated } =
+    useContext(AuthContext);
 
   // Show error modal when there's an API error
   useEffect(() => {

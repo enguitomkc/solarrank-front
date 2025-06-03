@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -15,7 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/utils/cn";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthContext } from "@/contexts/Auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -84,7 +84,7 @@ interface SidebarProps {
 export function Sidebar({ className, children }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const { logout, user } = useAuth();
+  const { logout, user } = useContext(AuthContext);
   const router = useRouter();
 
   const mobileSidebarVariants = {

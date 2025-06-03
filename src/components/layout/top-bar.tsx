@@ -1,12 +1,13 @@
 "use client";
 
+import { useContext } from "react";
 import Link from "next/link";
 import { BellIcon, SearchIcon, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
 import Image from "next/image";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthContext } from "@/contexts/Auth";
 
 interface TopBarProps {
   className?: string;
@@ -23,7 +24,7 @@ function getUserInitials(name: string): string {
 }
 
 export function TopBar({ className }: TopBarProps) {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useContext(AuthContext);
 
   return (
     <header

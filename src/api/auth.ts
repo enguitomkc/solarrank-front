@@ -1,4 +1,4 @@
-import { RegisterRequest, LoginRequest, AuthResponse } from '@/types/auth';
+import { RegisterRequest, LoginRequest, AuthResponse, RefreshTokenRequest, RefreshTokenResponse } from '@/types/auth';
 import { apiRequest } from '@/utils/apiRequest';
 
 export const authApi = {
@@ -13,6 +13,20 @@ export const authApi = {
     return apiRequest<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  },
+
+  async refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse> {
+    return apiRequest<RefreshTokenResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async logout(refreshToken: string): Promise<{ success: boolean; message: string }> {
+    return apiRequest<{ success: boolean; message: string }>('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
     });
   },
 

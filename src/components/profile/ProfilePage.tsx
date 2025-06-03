@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import ProfileHeader from "./ProfileHeader";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Header } from "@/components/ui/header";
 import { Achievement, Activity, Profile, Stats } from "@/types/profile";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthContext } from "@/contexts/Auth";
 
 interface ProfilePageProps {
   username: string;
@@ -18,20 +18,15 @@ interface ProfilePageProps {
 export default function ProfilePageComponent({
   username,
   profile,
-  stats,
-  achievements,
-  activities,
 }: ProfilePageProps) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useContext(AuthContext);
   // const [stats] = useState<UserStats>(mockStats);
   // const [achievements] = useState<Achievement[]>(mockAchievements);
   // const [activities] = useState<Activity[]>(mockActivities);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const isOwnProfile =
     currentUser?.name === profile.name || username === currentUser?.name;
-
-  console.log(profile, "????");
 
   // useEffect(() => {
   //   // In a real app, fetch profile data based on username

@@ -20,7 +20,8 @@ import {
   Globe,
   ArrowLeft,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useContext } from "react";
+import { AuthContext } from "@/contexts/Auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -36,7 +37,7 @@ interface ProfileFormData {
 }
 
 export default function ProfileSettingsComponent() {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   const router = useRouter();
 
   // Initialize form with current user data or defaults

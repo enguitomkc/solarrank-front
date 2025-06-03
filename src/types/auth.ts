@@ -20,23 +20,36 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   message: string;
   user?: User;
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
   errors?: Array<{
     field: string;
     message: string;
   }>;
 }
 
+export interface RefreshTokenResponse {
+  success: boolean;
+  message: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 export interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
   error: string | null;
+  isLoading: boolean;
 }
 
 export interface AuthActions {
@@ -44,7 +57,6 @@ export interface AuthActions {
   login: (data: LoginRequest) => Promise<void>;
   logout: () => void;
   clearError: () => void;
-  setLoading: (loading: boolean) => void;
 }
 
 export type AuthStore = AuthState & AuthActions; 

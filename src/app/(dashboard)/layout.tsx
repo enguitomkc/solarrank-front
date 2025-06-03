@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/components/providers";
+import { ThemeProvider } from "@/contexts/Theme";
 import { TopBar } from "@/components/layout/top-bar";
 import { Sidebar } from "@/components/layout/sidebar";
 
