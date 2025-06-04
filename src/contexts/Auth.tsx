@@ -1,10 +1,14 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 // import useAuthStore from "@/lib/stores/auth";
 import { AuthStore, LoginRequest, RegisterRequest, User } from "@/types/auth";
 import { apiRequest, axiosInstance } from "@/api/apiRequest";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/loading/Loading";
+import API from "@/api/enpoints";
+import { msUntilJWTExpiry } from "@/utils/jwt";
+import { setStrictTimeout } from "@/utils/time";
 
 export const AuthContext = createContext<AuthStore>({
   user: null,
@@ -24,13 +28,29 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(
+    JSON.parse(localStorage.getItem("user") || "null")
+  );
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem("isAuthenticated") === "true"
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(
+    localStorage.getItem("accessToken") || null
+  );
+  const [refreshToken, setRefreshToken] = useState<string | null>(
+    localStorage.getItem("refreshToken") || null
+  );
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [refreshSessionTimeout, setRefreshSessionTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+
+  const clearRefreshSessionTimeout = useCallback(() => {
+    if (refreshSessionTimeout) {
+      clearTimeout(refreshSessionTimeout);
+      setRefreshSessionTimeout(null);
+    }
+  }, [refreshSessionTimeout]);
 
   const setAuthState = (data: {
     user: User | null;
@@ -39,7 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     refreshToken: string | null;
   }) => {
     setUser(data.user);
-    setIsAuthenticated(true);
+    setIsAuthenticated(data.isAuthenticated);
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
 
@@ -49,14 +69,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("isAuthenticated", data.isAuthenticated.toString());
     localStorage.setItem("accessToken", data.accessToken ?? "");
     localStorage.setItem("refreshToken", data.refreshToken ?? "");
+
+    clearRefreshSessionTimeout();
   };
 
   const signup = async (data: RegisterRequest) => {
     setIsLoading(true);
-    const response = await apiRequest("/auth/signup", {
+    const response = await apiRequest(API.AUTH.signup, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -80,7 +102,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (data: LoginRequest) => {
     setIsLoading(true);
-    const response = await apiRequest("/auth/login", {
+    const response = await apiRequest(API.AUTH.login, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -91,7 +113,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         refreshToken: string;
         user: User;
       };
-      console.log(successData, "successData");
       setAuthState({ ...successData, isAuthenticated: true });
     } else {
       const errorData = response.data as { error: string };
@@ -102,7 +123,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     setIsLoading(true);
-    const response = await apiRequest("/auth/logout", {
+    const response = await apiRequest(API.AUTH.logout, {
       method: "POST",
       body: JSON.stringify({ refreshToken }),
     });
@@ -114,6 +135,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         accessToken: null,
         refreshToken: null,
       });
+      clearRefreshSessionTimeout();
       // Clear Authorization header on logout
       delete axiosInstance.defaults.headers.common.Authorization;
     }
@@ -123,7 +145,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const refresh = async (refreshToken: string) => {
-    const response = await apiRequest("/auth/refresh", {
+    const response = await apiRequest(API.AUTH.refresh, {
       method: "POST",
       body: JSON.stringify({ refreshToken }),
     });
@@ -133,24 +155,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const successData = response.data as { accessToken: string };
       setAccessToken(successData.accessToken);
       localStorage.setItem("accessToken", successData.accessToken);
+      clearRefreshSessionTimeout();
       // Set Authorization header for the new access token
       axiosInstance.defaults.headers.common.Authorization = `Bearer ${successData.accessToken}`;
     } else {
-      // Assert the type of response.data for the error case
-      const errorData = response.data as { error: string };
-      setError(errorData.error);
+      logout();
     }
   };
 
   const verifyToken = async () => {
-    const response = await apiRequest("/auth/verify", {
+    setIsLoading(true);
+    const response = await apiRequest(API.AUTH.verify, {
       method: "GET",
     });
 
-    if (response.success) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
+    if (!response.success) {
+      logout();
     }
     setIsLoading(false);
   };
@@ -159,31 +179,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setError(null);
   };
 
-  // Initialize auth state from localStorage and set Authorization header on app startup
+  // Set Authorization header on app startup and verify user is authenticated
   useEffect(() => {
-    const storedAccessToken = localStorage.getItem("accessToken");
-    const storedUser = localStorage.getItem("user");
-    const storedIsAuthenticated = localStorage.getItem("isAuthenticated");
-
-    if (storedAccessToken && storedUser && storedIsAuthenticated === "true") {
-      setAccessToken(storedAccessToken);
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+    if (accessToken) {
       // Set Authorization header for stored token
-      axiosInstance.defaults.headers.common.Authorization = `Bearer ${storedAccessToken}`;
+      axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
     }
 
     verifyToken();
-  }, []); // Only run on mount
+  }, []);
 
-  // Logout if user is not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      console.log("logging out");
-      logout();
-      // router.push("/");
+    if (accessToken && refreshToken && !refreshSessionTimeout) {
+      const minutesUntilExpiry = Math.floor(
+        msUntilJWTExpiry(accessToken) / 60000
+      );
+      const fiveMinutesBeforeExpiry = (minutesUntilExpiry - 1) * 60000;
+
+      const refreshSessionTimeout = setStrictTimeout(async () => {
+        await refresh(refreshToken);
+      }, fiveMinutesBeforeExpiry);
+      setRefreshSessionTimeout(refreshSessionTimeout);
     }
-  }, [isAuthenticated]);
+  }, [
+    accessToken,
+    refreshSessionTimeout,
+    refreshToken,
+    clearRefreshSessionTimeout,
+  ]);
 
   return (
     <AuthContext.Provider

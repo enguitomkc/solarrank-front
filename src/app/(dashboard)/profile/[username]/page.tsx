@@ -2,7 +2,8 @@ import { Metadata } from "next";
 // import { notFound } from "next/navigation";
 import { Activity, Achievement, Profile, Stats } from "@/types/profile";
 import ProfilePageComponent from "@/components/profile/ProfilePage";
-import { userProfileApi } from "@/api/userProfile";
+import { apiRequest } from "@/api/apiRequest";
+import API from "@/api/enpoints";
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -25,13 +26,16 @@ async function getProfileData(username: string): Promise<{
 }> {
   // Replace this with your actual API call
   // Example:
-  const res = await userProfileApi.getUserProfile(username);
+  const response = await apiRequest(API.USER.getUserProfile(username), {
+    method: "GET",
+  });
 
-  if (!res.success) {
-    throw new Error(res.error);
-  }
-
-  return res.data;
+  return response.data as {
+    profile: Profile;
+    stats: Stats;
+    achievements: Achievement[];
+    activities: Activity[];
+  };
 }
 
 // For now, returning mock data similar to what was in ProfilePageComponent

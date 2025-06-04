@@ -50,13 +50,19 @@ axiosInstance.interceptors.response.use(
   async err => {
     const originalRequest = err.config;
 
-    if (err.response?.status === 401 && !originalRequest._retry) {
-      console.log("intercepting 401");
+    if (err.response?.status === 403 && !originalRequest._retry) {
+      console.log("intercepting 403");
       originalRequest._retry = true;
       try {
-        const { data } = await axiosInstance.post('/auth/refresh');
+        const { data } = await axiosInstance.post(
+          '/auth/refresh',
+          {
+            refreshToken: localStorage.getItem("refreshToken"),
+          }
+        );
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
         originalRequest.headers['Authorization'] = `Bearer ${data.accessToken}`;
+        localStorage.setItem("accessToken", data.accessToken);
         return axiosInstance(originalRequest);
       } catch {
         return Promise.reject(err);
