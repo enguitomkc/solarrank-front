@@ -4,8 +4,6 @@ import { createContext, useCallback, useEffect, useState } from "react";
 // import useAuthStore from "@/lib/stores/auth";
 import { AuthStore, LoginRequest, RegisterRequest, User } from "@/types/auth";
 import { apiRequest, axiosInstance } from "@/api/apiRequest";
-import { useRouter } from "next/navigation";
-import Loading from "@/components/loading/Loading";
 import API from "@/api/enpoints";
 import { msUntilJWTExpiry } from "@/utils/jwt";
 import { setStrictTimeout } from "@/utils/time";
@@ -28,22 +26,47 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(
-    JSON.parse(localStorage.getItem("user") || "null")
-  );
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem("isAuthenticated") === "true"
-  );
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(
-    localStorage.getItem("accessToken") || null
-  );
-  const [refreshToken, setRefreshToken] = useState<string | null>(
-    localStorage.getItem("refreshToken") || null
-  );
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshSessionTimeout, setRefreshSessionTimeout] =
     useState<NodeJS.Timeout | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Initialize state from localStorage after component mounts and client is ready
+  useEffect(() => {
+    if (!isClient) return;
+
+    const storedUser = safeLocalStorageGet("user");
+    const storedIsAuthenticated = safeLocalStorageGet("isAuthenticated");
+    const storedAccessToken = safeLocalStorageGet("accessToken");
+    const storedRefreshToken = safeLocalStorageGet("refreshToken");
+
+    if (storedUser && storedUser !== "null") {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.warn("Error parsing stored user:", error);
+      }
+    }
+    if (storedIsAuthenticated === "true") {
+      setIsAuthenticated(true);
+    }
+    if (storedAccessToken) {
+      setAccessToken(storedAccessToken);
+    }
+    if (storedRefreshToken) {
+      setRefreshToken(storedRefreshToken);
+    }
+  }, [isClient]);
 
   const clearRefreshSessionTimeout = useCallback(() => {
     if (refreshSessionTimeout) {
@@ -68,10 +91,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       axiosInstance.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
     }
 
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("isAuthenticated", data.isAuthenticated.toString());
-    localStorage.setItem("accessToken", data.accessToken ?? "");
-    localStorage.setItem("refreshToken", data.refreshToken ?? "");
+    // Only update localStorage if we're on the client
+    if (isClient) {
+      safeLocalStorageSet("user", JSON.stringify(data.user));
+      safeLocalStorageSet("isAuthenticated", data.isAuthenticated.toString());
+      safeLocalStorageSet("accessToken", data.accessToken ?? "");
+      safeLocalStorageSet("refreshToken", data.refreshToken ?? "");
+    }
 
     clearRefreshSessionTimeout();
   };
@@ -154,7 +180,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Assert the type of response.data for the success case
       const successData = response.data as { accessToken: string };
       setAccessToken(successData.accessToken);
-      localStorage.setItem("accessToken", successData.accessToken);
+      if (isClient) {
+        safeLocalStorageSet("accessToken", successData.accessToken);
+      }
       clearRefreshSessionTimeout();
       // Set Authorization header for the new access token
       axiosInstance.defaults.headers.common.Authorization = `Bearer ${successData.accessToken}`;
@@ -181,16 +209,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Set Authorization header on app startup and verify user is authenticated
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && isClient) {
       // Set Authorization header for stored token
       axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+      verifyToken();
     }
-
-    verifyToken();
-  }, []);
+  }, [accessToken, isClient]);
 
   useEffect(() => {
-    if (accessToken && refreshToken && !refreshSessionTimeout) {
+    if (accessToken && refreshToken && !refreshSessionTimeout && isClient) {
       const minutesUntilExpiry = Math.floor(
         msUntilJWTExpiry(accessToken) / 60000
       );
@@ -206,7 +233,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     refreshSessionTimeout,
     refreshToken,
     clearRefreshSessionTimeout,
+    isClient,
   ]);
+
+  // Don't render until we're on the client side
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider
@@ -226,4 +259,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Safe localStorage access helper with additional checks
+const safeLocalStorageGet = (key: string): string | null => {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return localStorage.getItem(key);
+    }
+  } catch (error) {
+    console.warn(`Error accessing localStorage for key "${key}":`, error);
+  }
+  return null;
+};
+
+const safeLocalStorageSet = (key: string, value: string): void => {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.setItem(key, value);
+    }
+  } catch (error) {
+    console.warn(`Error setting localStorage for key "${key}":`, error);
+  }
 };
