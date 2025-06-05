@@ -7,6 +7,7 @@ import { apiRequest, axiosInstance } from "@/api/apiRequest";
 import API from "@/api/enpoints";
 import { msUntilJWTExpiry } from "@/utils/jwt";
 import { setStrictTimeout } from "@/utils/time";
+import Loading from "@/components/loading/Loading";
 
 export const AuthContext = createContext<AuthStore>({
   user: null,
@@ -38,7 +39,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Ensure we're on the client side
   useEffect(() => {
-    setIsClient(true);
+    setTimeout(() => {
+      setIsClient(true);
+    }, 1000);
   }, []);
 
   // Initialize state from localStorage after component mounts and client is ready
@@ -309,7 +312,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         clearError,
       }}
     >
-      {children}
+      {!isClient ? <Loading /> : children}
     </AuthContext.Provider>
   );
 };

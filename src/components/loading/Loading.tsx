@@ -38,7 +38,7 @@ export default function Loading() {
             {[0, 1, 2].map((index) => (
               <motion.div
                 key={index}
-                className="w-2 h-2 bg-blue-500 rounded-full"
+                className="w-2 h-2 bg-primary rounded-full mx-1"
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.5, 1, 0.5],
@@ -62,12 +62,14 @@ export default function Loading() {
         animate={{ opacity: 1, y: 0 }}
         transition={{
           duration: 0.6,
-          delay: 0.6,
           ease: "easeOut",
         }}
       >
-        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium text-center">
-          from solarrank
+        <p className="text-gray-500 dark:text-gray-400 font-medium text-center">
+          from{" "}
+          <span className="text-gray-800 dark:text-gray-200 font-bold">
+            SolarRank
+          </span>
         </p>
       </motion.div>
     </div>
