@@ -294,11 +294,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // msUntilJWTExpiry is used but not a direct dependency; effect reruns due to accessToken changing
   ]);
 
-  // Don't render until we're on the client side
-  if (!isClient) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <AuthContext.Provider
       value={{
