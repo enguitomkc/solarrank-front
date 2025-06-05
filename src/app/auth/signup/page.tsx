@@ -2,18 +2,18 @@
 
 import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ErrorModal } from "@/components/ui/error-modal";
+} from "@/components/ui/Card";
+import { Separator } from "@/components/ui/Separator";
+import { ErrorModal } from "@/components/ui/ErrorModal";
 import { AuthContext } from "@/contexts/Auth";
 
 export default function SignupPage() {

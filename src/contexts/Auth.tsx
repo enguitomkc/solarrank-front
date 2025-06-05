@@ -7,7 +7,7 @@ import { apiRequest, axiosInstance } from "@/api/apiRequest";
 import API from "@/api/enpoints";
 import { msUntilJWTExpiry } from "@/utils/jwt";
 import { setStrictTimeout } from "@/utils/time";
-import Loading from "@/components/loading/Loading";
+import Loading from "@/components/ui/Loading";
 
 export const AuthContext = createContext<AuthStore>({
   user: null,

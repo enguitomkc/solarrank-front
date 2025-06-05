@@ -1,5 +1,5 @@
 import { Activity } from "@/types/profile";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import {
   FileText,
   MessageSquare,
@@ -9,7 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 
-function ActivityFeed({ activities }: { activities: Activity[] }) {
+function ProfileActivityFeed({ activities }: { activities: Activity[] }) {
   const getActivityIcon = (type: Activity["type"]) => {
     switch (type) {
       case "post":
@@ -70,4 +70,4 @@ function ActivityFeed({ activities }: { activities: Activity[] }) {
   );
 }
 
-export default ActivityFeed;
+export default ProfileActivityFeed;

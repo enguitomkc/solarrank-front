@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import ProfileHeader from "./ProfileHeader";
+import ProfileHeader from "./Header";
 import { useContext, useState } from "react";
-import { Header } from "@/components/ui/header";
+import { Header } from "@/components/ui/Header";
 import { Achievement, Activity, Profile, Stats } from "@/types/profile";
 import { AuthContext } from "@/contexts/Auth";
 
-interface ProfilePageProps {
+interface ProfileComponentProps {
   username: string;
   profile: Profile;
   stats: Stats;
@@ -15,10 +15,10 @@ interface ProfilePageProps {
   activities: Activity[];
 }
 
-export default function ProfilePageComponent({
+export default function ProfileComponent({
   username,
   profile,
-}: ProfilePageProps) {
+}: ProfileComponentProps) {
   const { user: currentUser } = useContext(AuthContext);
   // const [stats] = useState<UserStats>(mockStats);
   // const [achievements] = useState<Achievement[]>(mockAchievements);

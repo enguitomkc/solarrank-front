@@ -3,8 +3,8 @@
 import { useContext } from "react";
 import Link from "next/link";
 import { BellIcon, SearchIcon, Menu } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import Image from "next/image";
 import { AuthContext } from "@/contexts/Auth";
@@ -23,7 +23,7 @@ function getUserInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function TopBar({ className }: TopBarProps) {
+function TopBar({ className }: TopBarProps) {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
 
   return (
@@ -137,3 +137,5 @@ export function TopBar({ className }: TopBarProps) {
     </header>
   );
 }
+
+export default TopBar;

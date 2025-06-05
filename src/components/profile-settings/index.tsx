@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Header } from "@/components/ui/header";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Textarea } from "@/components/ui/Textarea";
+import { Header } from "@/components/ui/Header";
+import { Separator } from "@/components/ui/Separator";
 import {
   User,
   Save,
@@ -36,7 +36,7 @@ interface ProfileFormData {
   profile_image: string;
 }
 
-export default function ProfileSettingsComponent() {
+function ProfileSettingsComponent() {
   const { user } = useContext(AuthContext);
   const router = useRouter();
 
@@ -336,3 +336,5 @@ export default function ProfileSettingsComponent() {
     </div>
   );
 }
+
+export default ProfileSettingsComponent;

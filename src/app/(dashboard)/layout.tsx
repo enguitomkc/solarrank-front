@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@/contexts/Theme";
-import { TopBar } from "@/components/layout/top-bar";
-import { Sidebar } from "@/components/layout/sidebar";
+import { TopBar, Sidebar } from "@/components/layout";
 
 export default function DashboardLayout({
   children,

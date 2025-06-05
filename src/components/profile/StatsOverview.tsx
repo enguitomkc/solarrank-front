@@ -1,9 +1,9 @@
 import { Stats } from "@/types/profile";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { TrendingUp } from "lucide-react";
-import { Progress } from "../ui/progress";
+import { Progress } from "../ui/Progress";
 
-function StatsOverview({ stats }: { stats: Stats }) {
+function ProfileStatsOverview({ stats }: { stats: Stats }) {
   const progressToNextLevel = ((stats.total_energy % 250) / 250) * 100;
 
   return (
@@ -50,4 +50,4 @@ function StatsOverview({ stats }: { stats: Stats }) {
   );
 }
 
-export default StatsOverview;
+export default ProfileStatsOverview;

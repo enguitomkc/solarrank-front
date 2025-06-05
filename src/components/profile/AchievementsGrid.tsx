@@ -1,9 +1,13 @@
 import { Achievement } from "@/types/profile";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Award } from "lucide-react";
-import { Badge } from "../ui/badge";
+import { Badge } from "../ui/Badge";
 
-function AchievementsGrid({ achievements }: { achievements: Achievement[] }) {
+function ProfileAchievementsGrid({
+  achievements,
+}: {
+  achievements: Achievement[];
+}) {
   return (
     <Card>
       <CardHeader>
@@ -42,4 +46,4 @@ function AchievementsGrid({ achievements }: { achievements: Achievement[] }) {
   );
 }
 
-export default AchievementsGrid;
+export default ProfileAchievementsGrid;

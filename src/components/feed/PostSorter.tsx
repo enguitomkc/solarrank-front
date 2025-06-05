@@ -1,17 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { useState } from "react";
 
 type SortOption = "newest" | "top";
 
-export function PostSorter() {
+function FeedPostSorter() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
 
   const handleSort = (option: SortOption) => {
@@ -54,3 +54,5 @@ export function PostSorter() {
     </div>
   );
 }
+
+export default FeedPostSorter;

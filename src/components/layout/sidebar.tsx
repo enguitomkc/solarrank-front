@@ -12,8 +12,8 @@ import {
   Grid,
   LogOut,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { cn } from "@/utils/cn";
 import { AuthContext } from "@/contexts/Auth";
 import { useRouter } from "next/navigation";
@@ -81,7 +81,7 @@ interface SidebarProps {
   children?: React.ReactNode;
 }
 
-export function Sidebar({ className, children }: SidebarProps) {
+function Sidebar({ className, children }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const { logout, user } = useContext(AuthContext);
@@ -398,3 +398,5 @@ export function Sidebar({ className, children }: SidebarProps) {
     </div>
   );
 }
+
+export default Sidebar;

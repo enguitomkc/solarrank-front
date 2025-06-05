@@ -1,8 +1,8 @@
 import { Profile } from "@/types/profile";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../ui/Card";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import {
   Edit,
   Settings,
@@ -12,9 +12,9 @@ import {
   Globe,
   Calendar,
 } from "lucide-react";
-import { Badge } from "../ui/badge";
+import { Badge } from "../ui/Badge";
 import { Link } from "lucide-react";
-import { Tooltip } from "../ui/tooltip";
+import { Tooltip } from "../ui/Tooltip";
 
 function ProfileHeader({
   profile,

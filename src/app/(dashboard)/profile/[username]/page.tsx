@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 // import { notFound } from "next/navigation";
 import { Activity, Achievement, Profile, Stats } from "@/types/profile";
-import ProfilePageComponent from "@/components/profile/ProfilePage";
+import ProfileComponent from "@/components/profile";
 import { apiRequest } from "@/api/apiRequest";
 import API from "@/api/enpoints";
 
@@ -70,7 +70,7 @@ export default async function UserProfilePage({
     // You'll need to modify ProfilePageComponent to accept these props
     // and remove its internal useState for this data and the useEffect for fetching.
     return (
-      <ProfilePageComponent
+      <ProfileComponent
         username={params.username} // Still pass username if needed for other client logic (e.g., isOwnProfile)
         profile={profile}
         stats={stats}
