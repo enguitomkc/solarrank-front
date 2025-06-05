@@ -170,23 +170,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // router.push("/");
   };
 
-  const refresh = async (refreshToken: string) => {
+  const refresh = async (currentRefreshToken: string) => {
+    console.log(
+      "AuthContext: refresh() called with token:",
+      currentRefreshToken?.substring(0, 20)
+    );
     const response = await apiRequest(API.AUTH.refresh, {
       method: "POST",
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({ refreshToken: currentRefreshToken }),
     });
+    console.log("AuthContext: refresh() API response:", response);
 
     if (response.success) {
-      // Assert the type of response.data for the success case
       const successData = response.data as { accessToken: string };
       setAccessToken(successData.accessToken);
       if (isClient) {
         safeLocalStorageSet("accessToken", successData.accessToken);
       }
-      clearRefreshSessionTimeout();
-      // Set Authorization header for the new access token
+
+      // Directly clear the timeout and set the state to null
+      if (refreshSessionTimeout) {
+        clearTimeout(refreshSessionTimeout);
+      }
+      setRefreshSessionTimeout(null); // Ensure state is set to null
+
+      console.log(
+        "AuthContext: Token refreshed successfully at",
+        new Date().toISOString()
+      );
       axiosInstance.defaults.headers.common.Authorization = `Bearer ${successData.accessToken}`;
     } else {
+      console.error(
+        "AuthContext: refresh() failed. Logging out. Error data:",
+        response.data
+      );
       logout();
     }
   };
@@ -216,24 +233,65 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [accessToken, isClient]);
 
+  // Refresh access token if it's about to expire
   useEffect(() => {
-    if (accessToken && refreshToken && !refreshSessionTimeout && isClient) {
-      const minutesUntilExpiry = Math.floor(
-        msUntilJWTExpiry(accessToken) / 60000
-      );
-      const fiveMinutesBeforeExpiry = (minutesUntilExpiry - 1) * 60000;
+    console.log("AuthContext: useEffect for refresh scheduling. State:", {
+      accessToken: !!accessToken,
+      refreshToken: !!refreshToken,
+      refreshSessionTimeout: !!refreshSessionTimeout, // This should be false to enter the if
+    });
 
-      const refreshSessionTimeout = setStrictTimeout(async () => {
-        await refresh(refreshToken);
+    if (accessToken && refreshToken && !refreshSessionTimeout) {
+      const msTillExpiry = msUntilJWTExpiry(accessToken);
+      const minutesUntilExpiry = Math.floor(msTillExpiry / 60000);
+      const fiveMinutesBeforeExpiry = (minutesUntilExpiry - 5) * 60000;
+
+      console.log("AuthContext: Scheduling refresh. Details:", {
+        msTillExpiry,
+        minutesUntilExpiry,
+        fiveMinutesBeforeExpiry,
+        currentTokenSnippet: accessToken?.substring(0, 20),
+      });
+
+      if (fiveMinutesBeforeExpiry < 0) {
+        console.warn(
+          `AuthContext: Calculated fiveMinutesBeforeExpiry is negative (${fiveMinutesBeforeExpiry}ms). Refresh might trigger immediately or indicate an expired token.`
+        );
+        // If the token is already expired or expiry is too soon,
+        // consider logging out or attempting an immediate refresh if appropriate.
+        // For now, we'll let it attempt to schedule, which might be immediate.
+      }
+      if (!isFinite(fiveMinutesBeforeExpiry)) {
+        console.error(
+          `AuthContext: Calculated fiveMinutesBeforeExpiry is not finite (${fiveMinutesBeforeExpiry}ms). Refresh will not be scheduled.`
+        );
+        return; // Don't schedule if delay is invalid
+      }
+
+      const newRefreshSessionTimeout = setStrictTimeout(async () => {
+        console.log("AuthContext: Timeout fired. Attempting to refresh token.");
+        // Ensure refreshToken is not null when calling refresh
+        if (refreshToken) {
+          await refresh(refreshToken);
+        } else {
+          console.error("AuthContext: refreshToken is null, cannot refresh.");
+          // Optionally logout or handle this state appropriately
+        }
       }, fiveMinutesBeforeExpiry);
-      setRefreshSessionTimeout(refreshSessionTimeout);
+      setRefreshSessionTimeout(newRefreshSessionTimeout);
+
+      console.log(
+        `AuthContext: Refresh timeout set with ID ${newRefreshSessionTimeout}. Will attempt refresh in ${
+          fiveMinutesBeforeExpiry / 1000
+        }s.`
+      );
     }
   }, [
     accessToken,
-    refreshSessionTimeout,
     refreshToken,
-    clearRefreshSessionTimeout,
-    isClient,
+    refreshSessionTimeout,
+    // Removed clearRefreshSessionTimeout from dependencies
+    // msUntilJWTExpiry is used but not a direct dependency; effect reruns due to accessToken changing
   ]);
 
   // Don't render until we're on the client side
