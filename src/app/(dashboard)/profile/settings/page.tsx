@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ProfileSettingsComponent from "@/components/profile-settings/ProfileSettings";
+import ProfileSettingsComponent from "@/components/profile-settings";
 
 export const metadata: Metadata = {
   title: "Profile Settings | SolarRank",

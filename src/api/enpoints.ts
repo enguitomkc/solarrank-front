@@ -7,6 +7,7 @@ const AUTH = {
 };
 
 const USER = {
+  getUsers: "/users",
   getUserProfile: (username: string) => `/users/${username}`,
   updateUserProfile: (username: string) => `/users/${username}`,
 };

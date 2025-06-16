@@ -7,9 +7,10 @@ import { Header } from "../ui/Header";
 import LeaderboardTabs from "./Tabs";
 import LeaderboardYourStats from "./YourStats";
 import LeaderboardTable from "./Table";
-import { mockUsers, leaderboardTabs } from "./mockData";
+import { leaderboardTabs } from "./mockData";
+import { IUser } from "@/types/apiResponse/User";
 
-function LeaderboardComponent() {
+function LeaderboardComponent({ users }: { users: IUser[] | null }) {
   const [selectedTab, setSelectedTab] = React.useState<string>("weekly");
   const [currentPage, setCurrentPage] = React.useState<number>(1);
 
@@ -34,7 +35,7 @@ function LeaderboardComponent() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">{mockUsers.length} Users</span>
+              <span className="font-medium">{users?.length || 0} Users</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
@@ -43,7 +44,7 @@ function LeaderboardComponent() {
             </div>
           </div>
           <LeaderboardTable
-            users={mockUsers}
+            users={users || []}
             currentPage={currentPage}
             totalPages={10}
             onPageChange={setCurrentPage}
