@@ -6,7 +6,7 @@ import { MOCK_POSTS } from "./mockData";
 
 function FeedComponent() {
   return (
-    <div className="container max-w-5xl space-y-6">
+    <div className="container space-y-6">
       <Header
         title="Community Feed"
         description="Share your thoughts and ideas with the community."

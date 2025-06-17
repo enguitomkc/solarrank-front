@@ -2,12 +2,20 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { BellIcon, SearchIcon, Menu } from "lucide-react";
+import { BellIcon, SearchIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import Image from "next/image";
 import { AuthContext } from "@/contexts/Auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
 
 interface TopBarProps {
   className?: string;
@@ -28,7 +36,10 @@ function TopBar({ className }: TopBarProps) {
 
   return (
     <header
-      className={cn("bg-black text-white sticky top-0 z-50 h-16", className)}
+      className={cn(
+        "bg-black text-white fixed top-0 left-0 right-0 z-50 h-16",
+        className
+      )}
     >
       <div className="container mx-auto h-full flex items-center justify-between px-4">
         {/* Left: Logo */}
@@ -42,9 +53,6 @@ function TopBar({ className }: TopBarProps) {
               priority
             />
           </Link>
-          <Button variant="ghost" size="icon" className="md:hidden ml-2">
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Center: Search */}
@@ -74,41 +82,48 @@ function TopBar({ className }: TopBarProps) {
 
           {isAuthenticated && user ? (
             // Show user avatar when authenticated
-            <div className="relative group">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium">
-                  {getUserInitials(user.name || user.email)}
-                </div>
-              </Button>
-
-              {/* Dropdown menu on hover/click */}
-              <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="py-1">
-                  <div className="px-4 py-2 text-sm text-popover-foreground border-b border-border">
-                    <div className="font-medium">{user.name || "User"}</div>
-                    <div className="text-muted-foreground">{user.email}</div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium">
+                    {getUserInitials(user.name || user.email)}
                   </div>
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-popover border border-border"
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.name || "User"}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">
                     Profile
                   </Link>
-                  <Link
-                    href="/settings"
-                    className="block px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer">
                     Settings
                   </Link>
-                  <button
-                    onClick={logout}
-                    className="block w-full text-left px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              </div>
-            </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
+                >
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             // Show sign in/sign up buttons when not authenticated
             <div className="flex items-center space-x-2">
