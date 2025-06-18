@@ -39,9 +39,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Ensure we're on the client side
   useEffect(() => {
-    setTimeout(() => {
-      setIsClient(true);
-    }, 1000);
+    setIsClient(true);
   }, []);
 
   // Initialize state from localStorage after component mounts and client is ready
