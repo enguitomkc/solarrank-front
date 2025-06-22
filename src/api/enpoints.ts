@@ -12,9 +12,15 @@ const USER = {
   updateUserProfile: (username: string) => `/users/${username}`,
 };
 
+const POSTS = {
+  getPosts: "/posts",
+  votePost: (postId: string) => `/posts/${postId}/vote`,
+};
+
 const API = {
   AUTH,
   USER,
+  POSTS,
 };
 
 export default API;

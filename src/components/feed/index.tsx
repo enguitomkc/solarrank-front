@@ -2,9 +2,9 @@ import FeedCreatePostButton from "./CreatePostButton";
 import FeedPostSorter from "./PostSorter";
 import FeedPostCard from "./PostCard";
 import { Header } from "../ui/Header";
-import { MOCK_POSTS } from "./mockData";
+import { IPostUserComment } from "@/types/apiResponse/Post";
 
-function FeedComponent() {
+function FeedComponent({ posts }: { posts: IPostUserComment[] }) {
   return (
     <div className="container space-y-6">
       <Header
@@ -17,8 +17,8 @@ function FeedComponent() {
         <FeedCreatePostButton />
       </div>
       <div className="space-y-4">
-        {MOCK_POSTS.map((post) => (
-          <FeedPostCard key={post.id} post={post} />
+        {posts.map((post) => (
+          <FeedPostCard key={post.post.id} post={post} />
         ))}
       </div>
     </div>

@@ -1,157 +1,184 @@
+"use client";
+
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
-import { MOCK_POSTS } from "./mockData";
 import { formatDate } from "@/utils/formatter";
+import { IPostUserComment } from "@/types/apiResponse/Post";
+import { MessageCircle, Share, Plus, Minus } from "lucide-react";
+import { apiRequest } from "@/api/apiRequest";
+import ENDPOINTS from "@/api/enpoints";
+import { useState } from "react";
 
-interface PostCardProps {
-  post: (typeof MOCK_POSTS)[0];
-}
+function FeedPostCard({ post }: { post: IPostUserComment }) {
+  const [energy, setEnergy] = useState(post.post.energy || 0);
+  const [vote, setVote] = useState(post.vote || null);
 
-function FeedPostCard({ post }: PostCardProps) {
+  console.log(post, "post");
+
+  console.log(energy, "energy");
+
+  const votePost = async (voteType: "positive" | "negative") => {
+    const energyChange = vote ? 2 : 1;
+    setVote(voteType);
+    setEnergy(
+      energy + (voteType === "positive" ? energyChange : -energyChange)
+    );
+    const result = await apiRequest(ENDPOINTS.POSTS.votePost(post.post.id), {
+      method: "POST",
+      body: JSON.stringify({ voteType }),
+    });
+    if (!result.success) {
+      setVote(null);
+      setEnergy(
+        (prev) =>
+          prev - (voteType === "positive" ? energyChange : -energyChange)
+      );
+    }
+  };
+
+  const unvotePost = async () => {
+    setVote(null);
+    setEnergy(energy - (vote === "positive" ? 1 : -1));
+    const result = await apiRequest(ENDPOINTS.POSTS.votePost(post.post.id), {
+      method: "DELETE",
+    });
+    if (!result.success) {
+      setVote(vote);
+      setEnergy((prev) => prev + (vote === "positive" ? 1 : -1));
+    }
+  };
+
+  const handleClickPositive = () => {
+    if (vote === "positive") {
+      unvotePost();
+    } else {
+      votePost("positive");
+    }
+  };
+
+  const handleClickNegative = () => {
+    if (vote === "negative") {
+      unvotePost();
+    } else {
+      votePost("negative");
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
-      <div className="flex items-start p-4">
-        {/* Vote controls */}
-        <div className="flex flex-col items-center mr-4 space-y-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            aria-label="Upvote"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-chevron-up"
+      <div className="p-4">
+        {/* Post header */}
+        <div className="flex items-center space-x-2 mb-3">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={post.user.profile_image} alt={post.user.name} />
+            <AvatarFallback>
+              {post.user.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex items-center">
+            <Link
+              href={`/profile/${post.user.id}`}
+              className="text-sm font-medium hover:underline"
             >
-              <path d="m18 15-6-6-6 6" />
-            </svg>
-          </Button>
-          <span className="text-sm font-semibold">
-            {post.upvotes - post.downvotes}
+              {post.user.name}
+            </Link>
+            <Badge variant="outline" className="ml-2 text-xs">
+              {post.user.rank}
+            </Badge>
+          </div>
+          <span className="text-xs text-muted-foreground ml-auto">
+            {formatDate(post.post.created_at)}
           </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            aria-label="Downvote"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-chevron-down"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </Button>
         </div>
 
         {/* Post content */}
-        <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={post.author.avatar} alt={post.author.name} />
-              <AvatarFallback>
-                {post.author.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex items-center">
-              <Link
-                href={`/profile/${post.author.id}`}
-                className="text-sm font-medium hover:underline"
-              >
-                {post.author.name}
-              </Link>
-              <Badge variant="outline" className="ml-2 text-xs">
-                {post.author.rank}
-              </Badge>
-            </div>
-            <span className="text-xs text-muted-foreground ml-auto">
-              {formatDate(post.createdAt)}
-            </span>
-          </div>
-
-          <Link href={`/post/${post.id}`} className="block hover:underline">
-            <h3 className="text-lg font-semibold mb-2">{post.title}</h3>
+        <div className="mb-4">
+          <Link
+            href={`/post/${post.post.id}`}
+            className="block hover:underline"
+          >
+            <h3 className="text-lg font-semibold mb-2">{post.post.title}</h3>
           </Link>
 
           <p className="text-sm text-muted-foreground mb-4">
-            {post.content.length > 300
-              ? `${post.content.slice(0, 300)}...`
-              : post.content}
+            {post.post.body.length > 300
+              ? `${post.post.body.slice(0, 300)}...`
+              : post.post.body}
           </p>
 
-          <div className="flex flex-wrap gap-2 mb-4">
-            {post.tags.map((tag) => (
+          <div className="flex flex-wrap gap-2">
+            {post.post.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
                 {tag}
               </Badge>
             ))}
           </div>
+        </div>
 
-          <div className="flex items-center justify-between border-t pt-3">
+        {/* Bottom actions - Energy voting and comments */}
+        <div className="flex items-center justify-between border-t pt-3">
+          <div className="flex items-center space-x-4">
+            {/* Energy voting */}
+            <div className="flex items-center space-x-1">
+              <Button
+                size="icon"
+                variant={vote === "positive" ? "positive" : "positiveOutline"}
+                className="h-6 w-6 rounded-full "
+                aria-label="Positive Energy"
+                onClick={handleClickPositive}
+              >
+                <Plus
+                  className={`h-3 w-3 ${
+                    vote === "positive" ? "text-white" : "text-red-600"
+                  }`}
+                />
+              </Button>
+
+              <span className="text-sm font-semibold px-2 py-1 rounded-full min-w-[2rem] text-center">
+                {energy}
+              </span>
+
+              <Button
+                size="icon"
+                variant={vote === "negative" ? "negative" : "negativeOutline"}
+                className="h-6 w-6 rounded-full"
+                aria-label="Negative Energy"
+                onClick={handleClickNegative}
+              >
+                <Minus
+                  className={`h-3 w-3 ${
+                    vote === "negative" ? "text-white" : "text-gray-900"
+                  }`}
+                />
+              </Button>
+            </div>
+
+            {/* Comments */}
             <Button
               variant="ghost"
               size="sm"
-              className="text-muted-foreground"
+              className="text-muted-foreground hover:text-foreground"
               asChild
             >
-              <Link href={`/post/${post.id}`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-2"
-                >
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                {post.commentCount} Comments
+              <Link href={`/post/${post.post.id}`}>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {post.comments?.count} Comments
               </Link>
             </Button>
-
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2"
-              >
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-              Share
-            </Button>
           </div>
+
+          {/* Share button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Share className="mr-2 h-4 w-4" />
+            Share
+          </Button>
         </div>
       </div>
     </Card>
